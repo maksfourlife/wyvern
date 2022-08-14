@@ -1,8 +1,7 @@
+use secp256k1::hashes::sha256;
 use std::collections::HashMap;
 use thiserror::Error;
-use wasmer::{
-    imports, CompileError, Function, Instance, Memory, MemoryType, Module, NativeFunc, Store, Value,
-};
+use wasmer::{imports, CompileError, Function, Instance, Memory, MemoryType, Module, Store};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Pubkey([u8; 20]);
@@ -42,7 +41,7 @@ impl Program {
     pub fn load(account: &Account) -> RuntimeResult<Self> {
         let store = Store::default();
 
-        let memory = Memory::new(&store, MemoryType::new(1, None, true)).unwrap();
+        let memory = Memory::new(&store, MemoryType::new(1, None, false)).unwrap();
 
         let imports = imports! {
             "env" => {
@@ -82,4 +81,8 @@ pub fn process_instruction(
     program.process_instruction(instruction);
 
     Ok(())
+}
+
+struct Transaction {
+    predecessor_hashes: Vec<sha256::Hash>,
 }
